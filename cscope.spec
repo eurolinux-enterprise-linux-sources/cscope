@@ -1,22 +1,20 @@
 Summary: C source code tree search and browse tool 
 Name: cscope
 Version: 15.8
-Release: 10%{?dist}
+Release: 4%{?dist}
 Source0: https://downloads.sourceforge.net/project/%{name}/%{name}/%{version}/%{name}-%{version}.tar.bz2
 URL: http://cscope.sourceforge.net
 License: BSD and GPLv2+
 Group: Development/Tools 
 BuildRoot: %{_tmppath}/%{name}-%{version}
 BuildRequires: pkgconfig ncurses-devel flex bison m4
-Requires: emacs-filesystem
 
 %define cscope_share_path %{_datadir}/cscope
+%define xemacs_lisp_path %{_datadir}/xemacs/site-packages/lisp
 %define emacs_lisp_path %{_datadir}/emacs/site-lisp
 %define vim_plugin_path %{_datadir}/vim/vimfiles/plugin
 
 Patch0: cscope-invindex-sizing.patch
-Patch1: cscope-15.8-init-function-array-to-unknown.patch
-Patch2: cscope-version.patch
 
 %description
 cscope is a mature, ncurses based, C source code tree browsing tool.  It 
@@ -28,8 +26,6 @@ matches for use in file editing.
 %prep
 %setup -q
 %patch0 -p0
-%patch1 -p1
-%patch2 -p1 -z .update
 
 %build
 %configure
@@ -43,19 +39,12 @@ mkdir -p $RPM_BUILD_ROOT%{cscope_share_path}
 cp -a contrib/xcscope/xcscope.el $RPM_BUILD_ROOT%{cscope_share_path}
 cp -a contrib/xcscope/cscope-indexer $RPM_BUILD_ROOT%{_bindir}
 cp -a contrib/cctree.vim $RPM_BUILD_ROOT%{cscope_share_path}
-for dir in %{emacs_lisp_path} ; do
-  mkdir -p $RPM_BUILD_ROOT$dir
-  ln -s %{cscope_share_path}/xcscope.el $RPM_BUILD_ROOT$dir
-  touch $RPM_BUILD_ROOT$dir/xcscope.elc
-  echo "%ghost $dir/xcscope.el*" >> %{name}-%{version}.files
-done
-
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 
-%files -f %{name}-%{version}.files
+%files
 %defattr(-,root,root,-)
 %{_bindir}/*
 %dir %{cscope_share_path}
@@ -64,41 +53,16 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/cs
 %doc AUTHORS COPYING ChangeLog README TODO contrib/cctree.txt
 
-%triggerin -- emacs, emacs-nox
-ln -sf %{cscope_share_path}/xcscope.el %{emacs_lisp_path}/xcscope.el
-
 %triggerin -- vim-filesystem
 ln -sf %{cscope_share_path}/cctree.vim %{vim_plugin_path}/cctree.vim
-
-%triggerun -- emacs, emacs-nox
-[ $2 -gt 0 ] && exit 0
-rm -f %{emacs_lisp_path}/xcscope.el
 
 %triggerun -- vim-filesystem
 [ $2 -gt 0 ] && exit 0
 rm -f %{vim_plugin_path}/cctree.vim
 
 %changelog
-* Wed Jun 07 2017 Neil Horman <nhorman@redhat.com> - 15.8-10
-- Add emacs-nox to triggin install/uninstall (bz 1412326)
-
-* Wed Feb 17 2016 Neil Horman <nhorman@redhat.com> - 15.8-9
-- Resolves bz 1057132)
-
-* Thu Feb 11 2016 Neil Horman <nhorman@redhat.com> - 15.8-8
-- Resolves bz 1124571
-
-* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 15.8-7
-- Mass rebuild 2014-01-24
-
-* Tue Jan 07 2014 Neil Horman <nhorman@redhat.com> - 15.8-6
-- Remove xemacs-filesystem as a dep (bz 1049179)
-
-* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 15.8-5
-- Mass rebuild 2013-12-27
-
-* Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 15.8-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+* Fri Nov 09 2012 Neil Horman <nhorman@redhat.com> - 15.8-4
+- Removed xemacs integration for RHEL7 (bz 782590)
 
 * Wed Jul 18 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 15.8-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
