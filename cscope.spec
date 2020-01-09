@@ -1,7 +1,7 @@
 Summary: C source code tree search and browse tool 
 Name: cscope
 Version: 15.8
-Release: 7%{?dist}
+Release: 9%{?dist}
 Source0: https://downloads.sourceforge.net/project/%{name}/%{name}/%{version}/%{name}-%{version}.tar.bz2
 URL: http://cscope.sourceforge.net
 License: BSD and GPLv2+
@@ -15,6 +15,8 @@ Requires: emacs-filesystem
 %define vim_plugin_path %{_datadir}/vim/vimfiles/plugin
 
 Patch0: cscope-invindex-sizing.patch
+Patch1: cscope-15.8-init-function-array-to-unknown.patch
+Patch2: cscope-version.patch
 
 %description
 cscope is a mature, ncurses based, C source code tree browsing tool.  It 
@@ -26,6 +28,8 @@ matches for use in file editing.
 %prep
 %setup -q
 %patch0 -p0
+%patch1 -p1
+%patch2 -p1 -z .update
 
 %build
 %configure
@@ -75,6 +79,12 @@ rm -f %{emacs_lisp_path}/xcscope.el
 rm -f %{vim_plugin_path}/cctree.vim
 
 %changelog
+* Wed Feb 17 2016 Neil Horman <nhorman@redhat.com> - 15.8-9
+- Resolves bz 1057132)
+
+* Thu Feb 11 2016 Neil Horman <nhorman@redhat.com> - 15.8-8
+- Resolves bz 1124571
+
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 15.8-7
 - Mass rebuild 2014-01-24
 

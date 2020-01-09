@@ -1,0 +1,14 @@
+diff -up ./src/find.c.nullfix ./src/find.c
+--- ./src/find.c.nullfix	2012-06-15 07:18:11.000000000 -0400
++++ ./src/find.c	2016-02-11 14:19:45.409675762 -0500
+@@ -1201,7 +1201,9 @@ getposting(void)
+ static void
+ putpostingref(POSTING *p, char *pat)
+ {
+-	static char	function[PATLEN + 1];	/* function name */
++	// initialize function to "unknown" so that the first line of temp1
++	// is properly formed if symbol matches a header file entry first time
++	static char function[PATLEN + 1] = "unknown";/* function name */
+ 
+ 	if (p->fcnoffset == 0) {
+ 		if (p->type == FCNDEF) { /* need to find the function name */
