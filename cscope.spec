@@ -1,16 +1,16 @@
 Summary: C source code tree search and browse tool 
 Name: cscope
 Version: 15.8
-Release: 4%{?dist}
+Release: 7%{?dist}
 Source0: https://downloads.sourceforge.net/project/%{name}/%{name}/%{version}/%{name}-%{version}.tar.bz2
 URL: http://cscope.sourceforge.net
 License: BSD and GPLv2+
 Group: Development/Tools 
 BuildRoot: %{_tmppath}/%{name}-%{version}
 BuildRequires: pkgconfig ncurses-devel flex bison m4
+Requires: emacs-filesystem
 
 %define cscope_share_path %{_datadir}/cscope
-%define xemacs_lisp_path %{_datadir}/xemacs/site-packages/lisp
 %define emacs_lisp_path %{_datadir}/emacs/site-lisp
 %define vim_plugin_path %{_datadir}/vim/vimfiles/plugin
 
@@ -39,12 +39,19 @@ mkdir -p $RPM_BUILD_ROOT%{cscope_share_path}
 cp -a contrib/xcscope/xcscope.el $RPM_BUILD_ROOT%{cscope_share_path}
 cp -a contrib/xcscope/cscope-indexer $RPM_BUILD_ROOT%{_bindir}
 cp -a contrib/cctree.vim $RPM_BUILD_ROOT%{cscope_share_path}
+for dir in %{emacs_lisp_path} ; do
+  mkdir -p $RPM_BUILD_ROOT$dir
+  ln -s %{cscope_share_path}/xcscope.el $RPM_BUILD_ROOT$dir
+  touch $RPM_BUILD_ROOT$dir/xcscope.elc
+  echo "%ghost $dir/xcscope.el*" >> %{name}-%{version}.files
+done
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 
-%files
+%files -f %{name}-%{version}.files
 %defattr(-,root,root,-)
 %{_bindir}/*
 %dir %{cscope_share_path}
@@ -53,16 +60,32 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/cs
 %doc AUTHORS COPYING ChangeLog README TODO contrib/cctree.txt
 
+%triggerin -- emacs
+ln -sf %{cscope_share_path}/xcscope.el %{emacs_lisp_path}/xcscope.el
+
 %triggerin -- vim-filesystem
 ln -sf %{cscope_share_path}/cctree.vim %{vim_plugin_path}/cctree.vim
+
+%triggerun -- emacs
+[ $2 -gt 0 ] && exit 0
+rm -f %{emacs_lisp_path}/xcscope.el
 
 %triggerun -- vim-filesystem
 [ $2 -gt 0 ] && exit 0
 rm -f %{vim_plugin_path}/cctree.vim
 
 %changelog
-* Fri Nov 09 2012 Neil Horman <nhorman@redhat.com> - 15.8-4
-- Removed xemacs integration for RHEL7 (bz 782590)
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 15.8-7
+- Mass rebuild 2014-01-24
+
+* Tue Jan 07 2014 Neil Horman <nhorman@redhat.com> - 15.8-6
+- Remove xemacs-filesystem as a dep (bz 1049179)
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 15.8-5
+- Mass rebuild 2013-12-27
+
+* Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 15.8-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
 * Wed Jul 18 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 15.8-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
