@@ -1,7 +1,7 @@
 Summary: C source code tree search and browse tool 
 Name: cscope
 Version: 15.6
-Release: 6%{?dist}
+Release: 7%{?dist}
 Source0: http://downloads.sourceforge.net/project/cscope/cscope/15.6/cscope-15.6.tar.gz
 URL: http://cscope.sourceforge.net
 License: BSD 
@@ -19,6 +19,7 @@ Patch2:cscope-15.6-xcscope-man.patch
 Patch3:cscope-15.6-sigwinch-linemode.patch
 Patch4:cscope-15.6-qrebuild.patch
 Patch5:cscope-15.6-incdir-overflow.patch
+Patch6:cscope-15.6-init-function-array-to-unknown.patch
 
 %description
 cscope is a mature, ncurses based, C source code tree browsing tool.  It 
@@ -35,6 +36,7 @@ matches for use in file editing.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
+%patch6 -p1
 
 %build
 %configure
@@ -83,6 +85,9 @@ rm -f %{xemacs_lisp_path}/xcscope.el
 rm -f %{emacs_lisp_path}/xcscope.el
 
 %changelog
+* Thu Jan 07 2016 Neil Horman <nhorman@redhat.com> -15.6-7
+- Fixed null pointer deref (bz 1124568)
+
 * Mon Nov 30 2009 Neil Horman <nhorman@redhat.com> - 15.6-6
 - Update Source0 url for package wrangler
 
